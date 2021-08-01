@@ -51,9 +51,7 @@ class App extends Component {
   }
 
   fetchImages = () => {
-    // const { searchQuery, page } = this.state;
-    // const options = { searchQuery, page };
-
+  
     this.setState({ isLoading: true });
 
     imagesApi
@@ -66,22 +64,7 @@ class App extends Component {
         .catch(error => this.setState({ error: error.message }))
         .finally(() => this.setState({ isLoading: false }));
     
-      }
-  //   imagesApi
-  //   .fatchImages()
-  //   .then(images => {
-  //     this.setState( prevState => ({
-  //       images: [...prevState.images, ...images], 
-  //       page: prevState.page + 1,
-  //       gallery: [...images], 
-  //     }));
-  //     if (images.length === 0) {
-  //         this.setState({
-  //           error: 'Nothing was find by your query. Try again.',});
-  //     }})
-    // .catch(error => this.setState({ error: error.message }))
-    // .finally(() => this.setState({ isLoading: false }));
-  // };
+  }
 
   onClickImageGalleryItem = e => {
     this.setState({
@@ -93,7 +76,6 @@ class App extends Component {
 
   render() {
     const { images, isLoading, error, showModal, modalAlt, modalUrl } = this.state;
-    // const shouldRenderLoadMoreButton = !(gallery.length < 12) && !isLoading;
 
     return (
       <>
