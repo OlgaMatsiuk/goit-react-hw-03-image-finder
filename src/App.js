@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-// import axios from 'axios';
-import ImagesApi from './Components/SearchApi';
+import imagesApi from './Components/SearchApi';
 
-// import imagesApi from './Components/imagesApi';
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
 import ImageGalleryItem from './Components/ImageGalleryItem'
@@ -11,8 +9,6 @@ import Modal from './Components/Modal';
 import Loader from 'react-loader-spinner';
 
 import './App.css';
-
-const imagesApi = new ImagesApi();
 
 class App extends Component {
   state = {
@@ -41,7 +37,7 @@ class App extends Component {
     }))
   }
 
-  handleInputSubmit = searchQuery => {
+  onChangeQuery = searchQuery => {
     this.setState({ 
       searchQuery: searchQuery, 
       page: 1, 
@@ -49,22 +45,27 @@ class App extends Component {
       error: null, 
     })
   }
-
   fetchImages = () => {
-  
+    const { searchQuery, page } = this.state;
+    const options = { searchQuery, page };
+
     this.setState({ isLoading: true });
 
     imagesApi
-        .fatchImages()
-        .then(({ hits }) =>
-          this.setState(prevState => ({
-            images: [...prevState.images, ...hits],
-          })),
-        )
-        .catch(error => this.setState({ error: error.message }))
-        .finally(() => this.setState({ isLoading: false }));
-    
-  }
+    .fetchImages(options)
+    .then(images => {
+      this.setState( prevState => ({
+        images: [...prevState.images, ...images], 
+        currentPage: prevState.page + 1,
+        currentPageImages: [...images], 
+      }));
+      if (images.length === 0) {
+          this.setState({
+            error: 'Nothing was find by your query. Try again.',});
+      }})
+    .catch(error => this.setState({ error: error.message }))
+    .finally(() => this.setState({ isLoading: false }));
+  };
 
   onClickImageGalleryItem = e => {
     this.setState({
@@ -79,7 +80,7 @@ class App extends Component {
 
     return (
       <>
-        <Searchbar onChangeQuery={this.handleInputSubmit} />
+        <Searchbar onChangeQuery={this.onChangeQuery} />
         {error && (
           <p style={{ color: 'red', textAlign: 'center', fontSize: '20px' }}>
             This is error: {error}
