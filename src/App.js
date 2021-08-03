@@ -3,7 +3,6 @@ import imagesApi from './Components/SearchApi';
 
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
-import ImageGalleryItem from './Components/ImageGalleryItem'
 import Button from './Components/Button';
 import Modal from './Components/Modal';
 import Loader from 'react-loader-spinner';
@@ -21,7 +20,6 @@ class App extends Component {
     largeImage: '',
     showModal: false,
     modalUrl: '',
-    modalAlt: '',
   };
 
 
@@ -29,6 +27,10 @@ class App extends Component {
     if (prevState.searchQuery !== this.state.searchQuery) {
       this.fetchImages();
     }
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   }
 
   toggleModal = () => {
@@ -36,7 +38,10 @@ class App extends Component {
       showModal: !showModal,
     }))
   }
-
+  onClickImageGalleryItem = path => {
+    this.setState({ modalUrl: path });
+    this.toggleModal();
+  }
   onChangeQuery = searchQuery => {
     this.setState({ 
       searchQuery: searchQuery, 
@@ -56,8 +61,8 @@ class App extends Component {
     .then(images => {
       this.setState( prevState => ({
         images: [...prevState.images, ...images], 
-        currentPage: prevState.page + 1,
-        currentPageImages: [...images], 
+        page: prevState.page + 1,
+        pageImages: [...images], 
       }));
       if (images.length === 0) {
           this.setState({
@@ -67,16 +72,8 @@ class App extends Component {
     .finally(() => this.setState({ isLoading: false }));
   };
 
-  onClickImageGalleryItem = e => {
-    this.setState({
-      modalUrl: e.currentTarget.getAttribute('url'),
-      modalAlt: e.currentTarget.getAttribute('alt'),
-    });
-    this.toggleModal();
-  }
-
   render() {
-    const { images, isLoading, error, showModal, modalAlt, modalUrl } = this.state;
+    const { images, isLoading, error, showModal, modalUrl } = this.state;
 
     return (
       <>
@@ -86,12 +83,7 @@ class App extends Component {
             This is error: {error}
           </p>
         )}
-
-        <ImageGallery>
-          {images.map(({ id, tags, webformatURL, largeImageURL }) => (
-            <ImageGalleryItem key={id} alt={tags} src={webformatURL} url={largeImageURL} onClick={this.onClickImageGalleryItem} />
-          ))}
-        </ImageGallery>
+        <ImageGallery images={images} onShowLargeImg ={this.onClickImageGalleryItem}/>
         { isLoading && <Loader type="Bars" color="#00BFFF" height={80} width={80} /> }       
 
 
@@ -100,8 +92,10 @@ class App extends Component {
         )}
 
         {showModal && (
-          <Modal src={modalUrl} alt={modalAlt} onClose={this.toggleModal} />
-        )}  
+          <Modal onClose={this.toggleModal}>
+            <img src={modalUrl} alt="" />
+          </Modal>
+        )}
       </>      
     )    
   }   
